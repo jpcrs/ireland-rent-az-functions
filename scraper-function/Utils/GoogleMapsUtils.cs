@@ -9,11 +9,16 @@ namespace scraper_function.Utils
 {
     public class GoogleMapsUtils : IMapUtils
     {
+        private readonly string apiKey;
+        public GoogleMapsUtils(string apiKey)
+        {
+            this.apiKey = apiKey;
+        }
 
         public (string lat, string lng)? GetMapLocation(string location)
         {
             var loc = location.Replace(" ", "+");
-            var coordinateUrl = $"https://maps.google.com/maps/api/geocode/json?address={loc}&key=key";
+            var coordinateUrl = $"https://maps.google.com/maps/api/geocode/json?address={loc}&key={apiKey}";
             var coordinates = GetCoordinates(coordinateUrl);
             return coordinates;
         }
@@ -53,7 +58,7 @@ namespace scraper_function.Utils
             string lngCenter = "-6.260278";
             var url =
                 $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={coordinates.Value.lat},{coordinates.Value.lng}" +
-                $"&destinations={latCenter},{lngCenter}&transit_routing_preference=less_walking&mode=walking&key=key";
+                $"&destinations={latCenter},{lngCenter}&transit_routing_preference=less_walking&mode=walking&key=key={apiKey}";
 
             try
             {

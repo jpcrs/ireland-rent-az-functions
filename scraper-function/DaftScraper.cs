@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using AngleSharp;
 using AngleSharp.Dom;
 using scraper_function.Model;
+using scraper_function.TableStorage;
 using scraper_function.Utils;
 
 namespace scraper_function
@@ -19,13 +20,13 @@ namespace scraper_function
         {
             this.tableStorageClient = tableStorageClient;
             this.mapUtils = mapUtils;
-            site = "https://www.daft.ie/";
+            site = "https://www.daft.ie";
         }
         public async Task<IEnumerable<MessageModel>> GetRents()
         {
-            var configuration = Configuration.Default.WithDefaultLoader();
-            var doc = await BrowsingContext.New(configuration).OpenAsync("https://www.daft.ie/dublin-city/residential-property-for-rent/dublin-1,dublin-2,dublin-4,dublin-6,dublin-6w,dublin-8/?ad_type=rental&advanced=1&s%5Bmxp%5D=1200&s%5Bmnb%5D=1&s%5Bmnbt%5D=1&s%5Bphotos%5D=1&s%5Badvanced%5D=1&s%5Bpt_id%5D%5B0%5D=1&s%5Bpt_id%5D%5B1%5D=2&s%5Bpt_id%5D%5B2%5D=3&s%5Bpt_id%5D%5B3%5D=4&searchSource=rental");
-            var rents = doc.QuerySelectorAll(".box").Where(t => tableStorageClient.CheckIfInCache(site + t.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "")) == false).Take(10);
+            var configuration = AngleSharp.Configuration.Default.WithDefaultLoader();
+            var doc = await BrowsingContext.New(configuration).OpenAsync(Environment.GetEnvironmentVariable("DaftUrl"));
+            var rents = doc.QuerySelectorAll(".box").Where(t => tableStorageClient.CheckIfInCache(site + t.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "")) == false).Take(2);
             var models = new List<MessageModel>();
             foreach (var rent in rents)
             {
@@ -44,11 +45,10 @@ namespace scraper_function
                     Photos = await GetPhotos(link),
                     Distance = distance
                 };
-                tableStorageClient.InsertRent(model);
                 models.Add(model);
             }
 
-            return new List<MessageModel>();
+            return models;
         }
 
         private string FormatTitle(IElement topico)
@@ -61,7 +61,7 @@ namespace scraper_function
 
         private async Task<List<string>> GetPhotos(string link)
         {
-            var config = Configuration.Default.WithDefaultLoader();
+            var config = AngleSharp.Configuration.Default.WithDefaultLoader();
             var doc = await BrowsingContext.New(config).OpenAsync(link);
             var imgs = doc.QuerySelectorAll(".pbxl_carousel_item img");
             return imgs?.Select(img => img.GetAttribute("src")).ToList();

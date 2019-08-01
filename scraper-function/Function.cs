@@ -5,6 +5,7 @@ using Microsoft.Azure.EventGrid;
 using Microsoft.Azure.EventGrid.Models;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using scraper_function.TableStorage;
 
 namespace scraper_function
@@ -29,11 +30,12 @@ namespace scraper_function
         }
 
         [FunctionName("GetLastProperties")]
-        public async Task Run([TimerTrigger("* */1 * * *")]TimerInfo myTimer, ILogger log)
+        public async Task Run([TimerTrigger("* */1 * * * *")]TimerInfo myTimer, ILogger log)
         {
             var rents = await scraper.GetRents();
             foreach (var rent in rents)
             {
+                var x = JsonConvert.SerializeObject(rent);
                 await client.PublishEventsAsync(topicHostname, new List<EventGridEvent>()
                     {
                         new EventGridEvent()

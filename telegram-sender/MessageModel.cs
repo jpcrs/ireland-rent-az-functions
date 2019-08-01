@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace scraper_function.Model
+namespace telegram_sender
 {
     public class MessageModel
     {

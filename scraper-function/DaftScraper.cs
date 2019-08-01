@@ -33,6 +33,7 @@ namespace scraper_function
                 var titulo = FormatTitle(rent);
                 var coordinates = mapUtils.GetMapLocation(titulo);
                 var distance = coordinates.HasValue ? mapUtils.GetDistance(coordinates) : 1;
+                var timeToWork = coordinates.HasValue ? mapUtils.GetMyWorkDistance(coordinates) : "";
                 var link = site + rent.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "");
                 var model = new MessageModel
                 {
@@ -43,7 +44,8 @@ namespace scraper_function
                     Map = mapUtils.GetMapUrl(coordinates, titulo),
                     InsertDate = DateTime.Now,
                     Photos = await GetPhotos(link),
-                    Distance = distance
+                    Distance = distance,
+                    WorkDistance = timeToWork
                 };
                 models.Add(model);
             }

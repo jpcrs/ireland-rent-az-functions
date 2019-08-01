@@ -27,7 +27,7 @@ namespace scraper_function.Utils
         {
             var loc = location.Replace(" ", "+");
             return coordinates != null
-                ? $"https://maps.googleapis.com/maps/api/staticmap?center={loc}&zoom=12&size=800x400&markers=color:blue%7Clabel:S%7C{coordinates.Value.lat},{coordinates.Value.lng}"
+                ? $"https://maps.googleapis.com/maps/api/staticmap?center={loc}&zoom=12&size=800x400&markers=color:blue%7Clabel:S%7C{coordinates.Value.lat},{coordinates.Value.lng}&key={apiKey}"
                 : null;
         }
 
@@ -58,7 +58,7 @@ namespace scraper_function.Utils
             string lngCenter = "-6.260278";
             var url =
                 $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={coordinates.Value.lat},{coordinates.Value.lng}" +
-                $"&destinations={latCenter},{lngCenter}&transit_routing_preference=less_walking&mode=walking&key=key={apiKey}";
+                $"&destinations={latCenter},{lngCenter}&mode=transit&key={apiKey}";
 
             try
             {
@@ -79,6 +79,35 @@ namespace scraper_function.Utils
             }
 
             return 0;
+        }
+
+        public string GetMyWorkDistance((string lat, string lng)? coordinates)
+        {
+            string latCenter = "53.3417151";
+            string lngCenter = "-6.25041";
+            var url =
+                $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={coordinates.Value.lat},{coordinates.Value.lng}" +
+                $"&destinations={latCenter},{lngCenter}&mode=transit&key={apiKey}";
+
+            try
+            {
+                var response = new System.Net.WebClient().DownloadString(url);
+                var root = JsonConvert.DeserializeObject<MapDistance>(response);
+                var result = root.rows.FirstOrDefault();
+
+                var element = result?.elements.FirstOrDefault();
+                if (element != null)
+                {
+                    return element.duration.text;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return "idk";
+            }
+
+            return "idk";
         }
     }
 

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using AngleSharp.Dom;
 using Microsoft.Azure.Cosmos.Table;
 using scraper_function.Model;
 
@@ -20,22 +21,23 @@ namespace scraper_function.TableStorage
             _table.CreateIfNotExistsAsync();
         }
 
-        public bool CheckIfInCache(string url)
+        public async Task<IElement> CheckIfInCache(IElement topico)
         {
+            var url = topico.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "");
             var hashedUrl = Convert.ToBase64String(Encoding.UTF8.GetBytes(url));
             TableOperation retrieveOperation = TableOperation.Retrieve<DaftEntity>(hashedUrl, hashedUrl);
 
-            TableResult retrievedResult = _table.Execute(retrieveOperation);
+            TableResult retrievedResult = await _table.ExecuteAsync(retrieveOperation);
             if (retrievedResult.Result == null)
             {
-                InsertRent(hashedUrl);
-                return false;
+                await InsertRent(hashedUrl);
+                return topico;
             }
 
-            return true;
+            return null;
         }
 
-        internal void InsertRent(string url)
+        internal async Task InsertRent(string url)
         {
             var entity = new DaftEntity()
             {
@@ -45,7 +47,7 @@ namespace scraper_function.TableStorage
 
             TableOperation insertOperation = TableOperation.Insert(entity);
 
-            _table.ExecuteAsync(insertOperation);
+            await _table.ExecuteAsync(insertOperation);
         }
     }
 }

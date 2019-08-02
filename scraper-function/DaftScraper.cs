@@ -27,7 +27,7 @@ namespace scraper_function
         {
             var configuration = AngleSharp.Configuration.Default.WithDefaultLoader();
             var doc = await BrowsingContext.New(configuration).OpenAsync(Environment.GetEnvironmentVariable("DaftUrl"));
-            var rents = doc.QuerySelectorAll(".box").Where(t => tableStorageClient.CheckIfInCache(site + t.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "")) == false).Take(2);
+            var rents = doc.QuerySelectorAll(".box").Select(async t => await tableStorageClient.CheckIfInCache(t)).Select(y => y.Result).Where(i => i != null).Take(10);
 
             var models = new ConcurrentBag<MessageModel>();
             var proccessRents = rents.Select(async rent =>
@@ -68,8 +68,8 @@ namespace scraper_function
         {
             var config = AngleSharp.Configuration.Default.WithDefaultLoader();
             var doc = await BrowsingContext.New(config).OpenAsync(link);
-            var imgs = doc.QuerySelectorAll(".pbxl_carousel_item img");
-            return imgs?.Select(img => img.GetAttribute("src")).ToList();
+            var imgs = doc.QuerySelectorAll(".pbxl_carousel_item img").Take(6);
+            return imgs?.Select(img => img.GetAttribute("src")).Take(6).ToList();
         }
     }
 }

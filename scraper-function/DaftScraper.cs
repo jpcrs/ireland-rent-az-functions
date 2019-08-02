@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,13 +28,14 @@ namespace scraper_function
             var configuration = AngleSharp.Configuration.Default.WithDefaultLoader();
             var doc = await BrowsingContext.New(configuration).OpenAsync(Environment.GetEnvironmentVariable("DaftUrl"));
             var rents = doc.QuerySelectorAll(".box").Where(t => tableStorageClient.CheckIfInCache(site + t.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "")) == false).Take(2);
-            var models = new List<MessageModel>();
-            foreach (var rent in rents)
+
+            var models = new ConcurrentBag<MessageModel>();
+            var proccessRents = rents.Select(async rent =>
             {
                 var titulo = FormatTitle(rent);
-                var coordinates = mapUtils.GetMapLocation(titulo);
-                var distance = coordinates.HasValue ? mapUtils.GetDistance(coordinates) : 1;
-                var timeToWork = coordinates.HasValue ? mapUtils.GetMyWorkDistance(coordinates) : "";
+                var coordinates = await mapUtils.GetMapLocation(titulo);
+                var distance = coordinates.HasValue ? await mapUtils.GetDistance(coordinates) : 1;
+                var timeToWork = coordinates.HasValue ? await mapUtils.GetMyWorkDistance(coordinates) : "";
                 var link = site + rent.QuerySelector(".search_result_title_box a").GetAttribute("href").Replace("'", "");
                 var model = new MessageModel
                 {
@@ -48,7 +50,8 @@ namespace scraper_function
                     WorkDistance = timeToWork
                 };
                 models.Add(model);
-            }
+            });
+            await Task.WhenAll(proccessRents);
 
             return models;
         }

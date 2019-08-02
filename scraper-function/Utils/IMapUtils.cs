@@ -1,10 +1,12 @@
-﻿namespace scraper_function.Utils
+﻿using System.Threading.Tasks;
+
+namespace scraper_function.Utils
 {
     public interface IMapUtils
     {
-        int GetDistance((string lat, string lng)? coordinates);
-        (string lat, string lng)? GetMapLocation(string location);
+        Task<int> GetDistance((string lat, string lng)? coordinates);
+        Task<(string lat, string lng)?> GetMapLocation(string location);
         string GetMapUrl((string lat, string lng)? coordinates, string location);
-        string GetMyWorkDistance((string lat, string lng)? coordinates);
+        Task<string> GetMyWorkDistance((string lat, string lng)? coordinates);
     }
 }

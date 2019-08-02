@@ -3,7 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace scraper_function.Utils
 {
@@ -15,11 +17,11 @@ namespace scraper_function.Utils
             this.apiKey = apiKey;
         }
 
-        public (string lat, string lng)? GetMapLocation(string location)
+        public async Task<(string lat, string lng)?> GetMapLocation(string location)
         {
             var loc = location.Replace(" ", "+");
             var coordinateUrl = $"https://maps.google.com/maps/api/geocode/json?address={loc}&key={apiKey}";
-            var coordinates = GetCoordinates(coordinateUrl);
+            var coordinates = await GetCoordinates(coordinateUrl);
             return coordinates;
         }
 
@@ -31,18 +33,20 @@ namespace scraper_function.Utils
                 : null;
         }
 
-        private (string lat, string lng)? GetCoordinates(string url)
+        private async Task<(string lat, string lng)?> GetCoordinates(string url)
         {
             try
             {
-                var response = new System.Net.WebClient().DownloadString(url);
-                var root = JsonConvert.DeserializeObject<MapCoordinates>(response);
-                var result = root.results.FirstOrDefault();
+                using (WebClient client = new WebClient())
+                {
+                    var response = await client.DownloadStringTaskAsync(new Uri(url));
+                    var root = JsonConvert.DeserializeObject<MapCoordinates>(response);
+                    var result = root.results.FirstOrDefault();
 
-                if (result != null)
-                    return (result.geometry.location.lat.ToString(CultureInfo.InvariantCulture),
-                        result.geometry.location.lng.ToString(CultureInfo.InvariantCulture));
-
+                    if (result != null)
+                        return (result.geometry.location.lat.ToString(CultureInfo.InvariantCulture),
+                            result.geometry.location.lng.ToString(CultureInfo.InvariantCulture));
+                }
                 return null;
             }
             catch (Exception ex)
@@ -52,7 +56,7 @@ namespace scraper_function.Utils
             }
         }
 
-        public int GetDistance((string lat, string lng)? coordinates)
+        public async Task<int> GetDistance((string lat, string lng)? coordinates)
         {
             string latCenter = "53.349722";
             string lngCenter = "-6.260278";
@@ -62,14 +66,17 @@ namespace scraper_function.Utils
 
             try
             {
-                var response = new System.Net.WebClient().DownloadString(url);
-                var root = JsonConvert.DeserializeObject<MapDistance>(response);
-                var result = root.rows.FirstOrDefault();
-
-                var element = result?.elements.FirstOrDefault();
-                if (element != null)
+                using (WebClient client = new WebClient())
                 {
-                    return element.distance.value;
+                    var response = await client.DownloadStringTaskAsync(url);
+                    var root = JsonConvert.DeserializeObject<MapDistance>(response);
+                    var result = root.rows.FirstOrDefault();
+
+                    var element = result?.elements.FirstOrDefault();
+                    if (element != null)
+                    {
+                        return element.distance.value;
+                    }
                 }
             }
             catch (Exception ex)
@@ -81,7 +88,7 @@ namespace scraper_function.Utils
             return 0;
         }
 
-        public string GetMyWorkDistance((string lat, string lng)? coordinates)
+        public async Task<string> GetMyWorkDistance((string lat, string lng)? coordinates)
         {
             string latCenter = "53.3417151";
             string lngCenter = "-6.25041";
@@ -91,14 +98,17 @@ namespace scraper_function.Utils
 
             try
             {
-                var response = new System.Net.WebClient().DownloadString(url);
-                var root = JsonConvert.DeserializeObject<MapDistance>(response);
-                var result = root.rows.FirstOrDefault();
-
-                var element = result?.elements.FirstOrDefault();
-                if (element != null)
+                using (WebClient client = new WebClient())
                 {
-                    return element.duration.text;
+                    var response = await client.DownloadStringTaskAsync(url);
+                    var root = JsonConvert.DeserializeObject<MapDistance>(response);
+                    var result = root.rows.FirstOrDefault();
+
+                    var element = result?.elements.FirstOrDefault();
+                    if (element != null)
+                    {
+                        return element.duration.text;
+                    }
                 }
             }
             catch (Exception ex)

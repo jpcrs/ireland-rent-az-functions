@@ -30,7 +30,7 @@ namespace scraper_function
         }
 
         [FunctionName("GetLastProperties")]
-        public async Task Run([TimerTrigger("* */1 * * * *")]TimerInfo myTimer, ILogger log)
+        public async Task Run([TimerTrigger("0 */1 * * * *")]TimerInfo myTimer, ILogger log)
         {
             var rents = await scraper.GetRents();
             foreach (var rent in rents)

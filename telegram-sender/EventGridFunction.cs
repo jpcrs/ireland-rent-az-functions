@@ -49,7 +49,7 @@ namespace telegram_sender
 
             if (message.Photos.Count > 0)
             {
-                IEnumerable<IAlbumInputMedia> inputMediaPhotos = message.Photos.Select(x => new InputMediaPhoto(new InputMedia(x)));
+                IEnumerable<IAlbumInputMedia> inputMediaPhotos = message.Photos.Select(x => new InputMediaPhoto(new InputMedia(x))).Take(6);
                 await botClient.SendMediaGroupAsync(inputMediaPhotos, Environment.GetEnvironmentVariable("ChatId"), replyToMessageId: reply.MessageId);
             }
         }

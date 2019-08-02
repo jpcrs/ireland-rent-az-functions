@@ -60,9 +60,12 @@ namespace scraper_function.Utils
         {
             string latCenter = "53.349722";
             string lngCenter = "-6.260278";
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            DateTime date = DateTime.Today.AddDays(((int)DayOfWeek.Tuesday - (int)DateTime.Today.DayOfWeek + 7) % 7);
+
             var url =
                 $"https://maps.googleapis.com/maps/api/distancematrix/json?units=metric&origins={coordinates.Value.lat},{coordinates.Value.lng}" +
-                $"&destinations={latCenter},{lngCenter}&mode=transit&key={apiKey}";
+                $"&destinations={latCenter},{lngCenter}&mode=transit&arrival_time={Math.Floor((date.ToUniversalTime() - origin).TotalSeconds)}&key={apiKey}";
 
             try
             {

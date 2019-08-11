@@ -25,7 +25,7 @@ namespace telegram_sender
 
 
             var inlineButtons = new[] { InlineKeyboardButton.WithUrl("Link", message.Link) };
-            var distanceMessage = message.WorkDistance != "" ? $"<b>-TavelPort Digital:</b> {message.WorkDistance}" : $"????";
+            var distanceMessage = message.WorkDistance != "" ? $"<b>-TravelPort Digital:</b> {message.WorkDistance}" : $"????";
             var msg = "";
             Message reply;
             if (message.Map != null)

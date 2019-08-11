@@ -1,0 +1,1 @@
+[![Build Status](https://dev.azure.com/joaopcrs/ireland-rent-az-functions/_apis/build/status/ireland-rent-az-functions-CI?branchName=master)](https://dev.azure.com/joaopcrs/ireland-rent-az-functions/_build/latest?definitionId=3&branchName=master)

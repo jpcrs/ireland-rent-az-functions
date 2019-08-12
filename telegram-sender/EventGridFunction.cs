@@ -39,7 +39,7 @@ namespace telegram_sender
             }
             else
             {
-                msg = $@"<b>Mapa não localizado.</b>
+                msg = $@"<b>Mapa não localizado. :(</b>
 <b>-Location:</b> {message.Location}
 {distanceMessage}
 <b>-Price:</b> {message.Price}";
